@@ -57,9 +57,9 @@ $nupkgFile = Get-ChildItem $outputDir *.nupkg | ?{ !$_.Name.Contains("symbols") 
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [System.IO.Compression.ZipFile]::ExtractToDirectory($nupkgFile.FullName, $extractDirectory)
 
-$x64Dir = md "$extractDirectory\runtimes\win7-x64\lib\net451\"
-$x86Dir = md "$extractDirectory\runtimes\win7-x86\lib\net451\"
-$unixDir = md "$extractDirectory\runtimes\unix-x64\lib\net451\"
+$x64Dir = New-Item -type directory -path "$extractDirectory\runtimes\win7-x64\lib\net451\"
+$x86Dir = New-Item -type directory -path "$extractDirectory\runtimes\win7-x86\lib\net451\"
+$unixDir = New-Item -type directory -path "$extractDirectory\runtimes\unix-x64\lib\net451\"
 Copy-Item $extractDirectory\lib\net451\dotnet-test-xunit.exe $x64Dir\dotnet-test-xunit.exe
 Copy-Item $extractDirectory\lib\net451\dotnet-test-xunit.exe $unixDir\dotnet-test-xunit.exe
 
