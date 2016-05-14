@@ -4,7 +4,7 @@
   "description": "Console and Visual Studio runner for xUnit.net.Supported platforms:- dotnet 5.4+",
   "name": "dotnet-test-xunit",
   "developmentDependency": true,
-  "version": "99.99.99-rc2",
+  "version": "0.0.0-dev",
   "buildOptions": {
     "warningsAsErrors": true,
     "emitEntryPoint": true,
