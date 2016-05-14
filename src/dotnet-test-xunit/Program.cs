@@ -48,7 +48,7 @@ namespace Xunit.Runner.DotNet
             {
                 var reporters = GetAvailableRunnerReporters();
 
-                if (args.Length == 0 || args.Any(arg => arg == "-?"))
+                if (args.Length == 0 || args.Any(arg => arg == "-?" || arg == "-help"))
                 {
                     PrintHeader();
                     PrintUsage(reporters);
