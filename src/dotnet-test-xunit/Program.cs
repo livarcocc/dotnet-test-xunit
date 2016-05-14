@@ -222,7 +222,7 @@ namespace Xunit.Runner.DotNet
         }
 
         void PrintHeader() =>
-            Console.WriteLine($"xUnit.net Runner ({IntPtr.Size * 8}-bit {RuntimeEnvironment.GetRuntimeIdentifier()})");
+            Console.WriteLine($"xUnit.net .NET CLI test runner ({IntPtr.Size * 8}-bit {RuntimeEnvironment.GetRuntimeIdentifier()})");
 
         static void PrintUsage(IReadOnlyList<IRunnerReporter> reporters)
         {
