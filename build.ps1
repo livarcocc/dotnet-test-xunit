@@ -1,6 +1,7 @@
 $solutionPath = split-path $MyInvocation.MyCommand.Definition
-$toolsPath = join-path $solutionPath "tools"
+$toolsPath = join-path $solutionPath ".dotnet"
 $getDotNet = join-path $toolsPath "install.ps1"
+$nugetExePath = join-path $toolsPath "nuget.exe"
 
 write-host "Download latest install script from CLI repo"
 
@@ -82,7 +83,6 @@ New-Item -type directory -path $PWD\artifacts\packages | Out-Null
 }
 
 # Download latest nuget
-$nugetExePath = "$PWD\.dotnet\nuget.exe"
 if (!(Test-Path $nugetExePath)) {
     Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/v3.4.2-rc/nuget.exe -OutFile $nugetExePath
 }
