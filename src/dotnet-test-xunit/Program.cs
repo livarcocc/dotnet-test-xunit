@@ -37,9 +37,7 @@ namespace Xunit.Runner.DotNet
         public static int Main(string[] args)
         {
             using (var program = new Program())
-            {
                 return program.Run(args);
-            }
         }
 
         public int Run(string[] args)
@@ -111,9 +109,7 @@ namespace Xunit.Runner.DotNet
                                            commandLine.DesignTime, commandLine.List, testsToRun);
 
                 if (commandLine.Wait)
-                {
                     WaitForInput();
-                }
 
                 return failCount > 0 ? 1 : 0;
             }
@@ -188,6 +184,7 @@ namespace Xunit.Runner.DotNet
             Environment.Exit(1);
         }
 #endif
+
         static List<IRunnerReporter> GetAvailableRunnerReporters()
         {
             var result = new List<IRunnerReporter>();
@@ -224,21 +221,17 @@ namespace Xunit.Runner.DotNet
             return result;
         }
 
-        void PrintHeader()
-        {
-            Console.WriteLine("xUnit.net Runner ({0}-bit {1})",
-                IntPtr.Size * 8,
-                RuntimeEnvironment.GetRuntimeIdentifier());
-        }
+        void PrintHeader() =>
+            Console.WriteLine($"xUnit.net Runner ({IntPtr.Size * 8}-bit {RuntimeEnvironment.GetRuntimeIdentifier()})");
 
         static void PrintUsage(IReadOnlyList<IRunnerReporter> reporters)
         {
-            Console.WriteLine("Copyright (C) 2015 Outercurve Foundation.");
+            Console.WriteLine("Copyright (C) 2016 Outercurve Foundation.");
             Console.WriteLine();
             Console.WriteLine("usage: dotnet-test-xunit [configFile.json] [options] [reporter] [resultFormat filename [...]]");
             Console.WriteLine();
             Console.WriteLine("Valid options:");
-            Console.WriteLine("  -nologo                : do not show the copyright message");
+            Console.WriteLine("  -nologo                : do not show the header message");
             Console.WriteLine("  -nocolor               : do not output results with colors");
             Console.WriteLine("  -parallel option       : set parallelization based on option");
             Console.WriteLine("                         :   none        - turn off all parallelization");
@@ -376,18 +369,12 @@ namespace Xunit.Runner.DotNet
         private void SendTestCompletedIfNecessary(bool designTime, bool list)
         {
             if (!designTime)
-            {
                 return;
-            }
 
             if (list)
-            {
                 _testDiscoverySink.SendTestCompleted();
-            }
             else
-            {
                 _testExecutionSink.SendTestCompleted();
-            }
         }
 
         XElement ExecuteAssembly(object consoleLock,
@@ -470,9 +457,7 @@ namespace Xunit.Runner.DotNet
                     IExecutionVisitor resultsVisitor;
 
                     if (designTime)
-                    {
                         resultsVisitor = new DesignTimeExecutionVisitor(_testExecutionSink, vsTestCases, _reporterMessageHandler);
-                    }
                     else
                         resultsVisitor = new XmlAggregateVisitor(_reporterMessageHandler, _completionMessages, assemblyElement, () => _cancel);
 

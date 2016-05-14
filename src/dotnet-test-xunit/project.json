@@ -1,59 +1,59 @@
 ﻿{
-  "authors": [ "James Newkirk", "Brad Wilson" ],
-  "title": "xUnit.net [Runner: dotnet]",
-  "description": "Console and Visual Studio runner for xUnit.net.Supported platforms:- dotnet 5.4+",
-  "name": "dotnet-test-xunit",
-  "developmentDependency": true,
-  "version": "99.99.99-dev",
-  "buildOptions": {
-    "warningsAsErrors": true,
-    "emitEntryPoint": true,
-    "preserveCompilationContext": true
-  },
-  "packOptions": {
-    "projectUrl": "https://github.com/xunit/coreclr.xunit",
-    "iconUrl": "https://raw.githubusercontent.com/xunit/media/master/logo-512-transparent.png",
-    "licenseUrl": "https://raw.githubusercontent.com/xunit/xunit/master/license.txt",
-    "requireLicenseAcceptance": false,
-    "repository": {
-      "type": "git",
-      "url": "https://github.com/xunit/coreclr.xunit"
-    }
-  },
-  "configurations": {
-    "debug_x86": {
-      "buildOptions": {
-        "platform": "anycpu32bitpreferred"
-      }
+    "authors": [ "James Newkirk", "Brad Wilson" ],
+    "title": "xUnit.net [Runner: .NET CLI]",
+    "description": "Console and Visual Studio runner for xUnit.net.\r\n\r\nSupported platforms:\r\n- .NET Core 1.0+\r\n- .NET 4.5.1+",
+    "name": "dotnet-test-xunit",
+    "developmentDependency": true,
+    "version": "99.99.99-dev",
+    "buildOptions": {
+        "warningsAsErrors": true,
+        "emitEntryPoint": true,
+        "preserveCompilationContext": true
     },
-    "release_x86": {
-      "buildOptions": {
-        "platform": "anycpu32bitpreferred"
-      }
-    }
-  },
-  "frameworks": {
-    "netcoreapp1.0": {
-      "imports": [
-        "dotnet",
-        "portable-dnxcore50+net45+win8+wp8+wpa81",
-        "portable-net45+win8"
-      ],
-      "dependencies": {
-        "Microsoft.NETCore.App": {
-          "version": "1.0.0-rc2-3002702",
-          "type": "platform"
+    "packOptions": {
+        "projectUrl": "https://github.com/xunit/coreclr.xunit",
+        "iconUrl": "https://raw.githubusercontent.com/xunit/media/master/logo-512-transparent.png",
+        "licenseUrl": "https://raw.githubusercontent.com/xunit/xunit/master/license.txt",
+        "requireLicenseAcceptance": false,
+        "repository": {
+            "type": "git",
+            "url": "https://github.com/xunit/coreclr.xunit"
         }
-      }
     },
-    "net451": {
-      "frameworkAssemblies": {
-        "System.Threading.Tasks": ""
-      }
+    "configurations": {
+        "debug_x86": {
+            "buildOptions": {
+                "platform": "anycpu32bitpreferred"
+            }
+        },
+        "release_x86": {
+            "buildOptions": {
+                "platform": "anycpu32bitpreferred"
+            }
+        }
+    },
+    "frameworks": {
+        "netcoreapp1.0": {
+            "imports": [
+                "dotnet",
+                "portable-dnxcore50+net45+win8+wp8+wpa81",
+                "portable-net45+win8"
+            ],
+            "dependencies": {
+                "Microsoft.NETCore.App": {
+                    "version": "1.0.0-rc2-3002702",
+                    "type": "platform"
+                }
+            }
+        },
+        "net451": {
+            "frameworkAssemblies": {
+                "System.Threading.Tasks": ""
+            }
+        }
+    },
+    "dependencies": {
+        "Microsoft.Extensions.Testing.Abstractions": "1.0.0-preview1-002702",
+        "xunit.runner.reporters": "2.1.0"
     }
-  },
-  "dependencies": {
-    "Microsoft.Extensions.Testing.Abstractions": "1.0.0-preview1-002702",
-    "xunit.runner.reporters": "2.1.0"
-  }
 }
