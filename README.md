@@ -17,6 +17,15 @@ To install this package, ensure your project.json contains the following lines:
     "testRunner": "xunit"
 }
 ```
+To use [xUnit configration](http://xunit.github.io/docs/configuring-with-json.html), make sure to add `buildOptions` to your project.json:
+
+```JSON
+"buildOptions": {
+  "copyToOutput": {
+    "include": [ "xunit.runner.json" ]
+  }
+}
+```
 
 To run tests from the command line, use the following.
 
@@ -29,16 +38,6 @@ dotnet test
 
 # Run tests if tests are not in the current directory
 dotnet -p path/to/project test // not yet implemented
-```
-
-To use [xUnit configration](http://xunit.github.io/docs/configuring-with-json.html), make sure to add the `buildOutput` to your project.json:
-
-```JSON
-"buildOptions": {
-  "copyToOutput": {
-    "include": [ "xunit.runner.json" ]
-  }
-}
 ```
 
 ### More Information
