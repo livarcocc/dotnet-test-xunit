@@ -14,7 +14,7 @@ To install this package, ensure your project.json contains the following lines:
         "xunit": "2.1.0-*",
         "dotnet-test-xunit": "2.1.0-*"
     },
-    "testRunner": "dotnet-test-xunit"
+    "testRunner": "xunit"
 }
 ```
 
