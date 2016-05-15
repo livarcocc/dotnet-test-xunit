@@ -1,4 +1,9 @@
 ﻿{
+  "buildOptions": {
+      "copyToOutput": {
+        "include": [ "xunit.runner.json" ]
+    }
+  },
   "frameworks": {
     "netcoreapp1.0": {
       "imports": [

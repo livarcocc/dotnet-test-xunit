@@ -297,7 +297,14 @@ namespace Xunit.Runner.DotNet
             var consoleLock = new object();
 
             if (!parallelizeAssemblies.HasValue)
-                parallelizeAssemblies = project.All(assembly => assembly.Configuration.ParallelizeAssemblyOrDefault);
+                parallelizeAssemblies = project.All(assembly =>
+                                                    {
+                                                        var assm = (XunitProjectAssembly2)assembly;
+
+                                                        return assm.ConfigFilename != null ?
+                                                            assm.Configuration.ParallelizeAssemblyOrDefault :
+                                                            assm.ConfigurationStream.ParallelizeAssemblyOrDefault;
+                                                    });
 
             if (needsXml)
                 assembliesElement = new XElement("assemblies");
@@ -313,7 +320,7 @@ namespace Xunit.Runner.DotNet
                     var tasks = project.Assemblies.Select(assembly => TaskRun(() =>
                         ExecuteAssembly(
                             consoleLock,
-                            assembly,
+                            (XunitProjectAssembly2)assembly,
                             needsXml,
                             parallelizeTestCollections,
                             maxThreadCount,
@@ -334,7 +341,7 @@ namespace Xunit.Runner.DotNet
                     {
                         var assemblyElement = ExecuteAssembly(
                             consoleLock,
-                            assembly,
+                            (XunitProjectAssembly2)assembly,
                             needsXml,
                             parallelizeTestCollections,
                             maxThreadCount,
@@ -378,7 +385,7 @@ namespace Xunit.Runner.DotNet
         }
 
         XElement ExecuteAssembly(object consoleLock,
-                                 XunitProjectAssembly assembly,
+                                 XunitProjectAssembly2 assembly,
                                  bool needsXml,
                                  bool? parallelizeTestCollections,
                                  int? maxThreadCount,
@@ -396,22 +403,25 @@ namespace Xunit.Runner.DotNet
 
             try
             {
+                 // if we had a config file use it
+                var config = assembly.ConfigFilename != null ? assembly.Configuration : assembly.ConfigurationStream;                
+
                 // Turn off pre-enumeration of theories when we're not running in Visual Studio
                 if (!designTime)
-                    assembly.Configuration.PreEnumerateTheories = false;
+                    config.PreEnumerateTheories = false;
 
                 if (diagnosticMessages)
-                    assembly.Configuration.DiagnosticMessages = true;
+                    config.DiagnosticMessages = true;               
 
-                var discoveryOptions = TestFrameworkOptions.ForDiscovery(assembly.Configuration);
-                var executionOptions = TestFrameworkOptions.ForExecution(assembly.Configuration);
+                var discoveryOptions = TestFrameworkOptions.ForDiscovery(config);
+                var executionOptions = TestFrameworkOptions.ForExecution(config);
                 if (maxThreadCount.HasValue)
                     executionOptions.SetMaxParallelThreads(maxThreadCount);
                 if (parallelizeTestCollections.HasValue)
                     executionOptions.SetDisableParallelization(!parallelizeTestCollections.GetValueOrDefault());
 
                 var assemblyDisplayName = Path.GetFileNameWithoutExtension(assembly.AssemblyFilename);
-                var diagnosticMessageVisitor = new DiagnosticMessageVisitor(consoleLock, assemblyDisplayName, assembly.Configuration.DiagnosticMessagesOrDefault, noColor);
+                var diagnosticMessageVisitor = new DiagnosticMessageVisitor(consoleLock, assemblyDisplayName, config.DiagnosticMessagesOrDefault, noColor);
 
                 var sourceInformationProvider = GetSourceInformationProviderAdapater(assembly);
 
