@@ -31,6 +31,16 @@ dotnet test
 dotnet -p path/to/project test // not yet implemented
 ```
 
+To use [xUnit configration](http://xunit.github.io/docs/configuring-with-json.html), make sure to add the `buildOutput` to your project.json:
+
+```JSON
+"buildOptions": {
+  "copyToOutput": {
+    "include": [ "xunit.runner.json" ]
+  }
+}
+```
+
 ### More Information
 
 For more complete example usage, please see [Getting Started with xUnit.net and CoreCLR / ASP.NET 5](http://xunit.github.io/docs/getting-started-coreclr.html).
