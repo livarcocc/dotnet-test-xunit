@@ -1,6 +1,6 @@
 ## <a href="https://github.com/xunit/xunit"><img src="https://raw.github.com/xunit/media/master/full-logo.png" title="xUnit.net CoreCLR Runner" /></a>
 
-This runner supports [xUnit.net](https://github.com/xunit/xunit) tests for [dotnet 4.5.1+, and dotnet Core 5+](https://github.com/dotnet/corefx) (this includes [ASP.NET 5+](https://github.com/aspnet)).
+This runner supports [xUnit.net](https://github.com/xunit/xunit) tests for [.NET 4.5.1+, and .NET Core 1.0+](https://github.com/dotnet/corefx) (this includes [ASP.NET Core 1.0+](https://github.com/aspnet)).
 
 ![](https://mseng.visualstudio.com/_apis/public/build/definitions/d09b7a4d-0a51-4c0e-a15a-07921d5b558f/3249/badge)
 
@@ -11,8 +11,8 @@ To install this package, ensure your project.json contains the following lines:
 ```JSON
 {
     "dependencies": {
-        "xunit": "2.1.0-*",
-        "dotnet-test-xunit": "2.1.0-*"
+        "xunit": "2.1.0",
+        "dotnet-test-xunit": "1.0.0-*"
     },
     "testRunner": "xunit"
 }
