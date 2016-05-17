@@ -15,7 +15,7 @@ if (!(Test-Path $env:DOTNET_INSTALL_DIR)) {
     New-Item -type directory -path $env:DOTNET_INSTALL_DIR | Out-Null
 }
     
-& $getDotNet
+& $getDotNet -arch x64
 
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 
