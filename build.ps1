@@ -7,15 +7,17 @@ write-host "Download latest install script from CLI repo"
 
 New-Item -type directory -f -path $toolsPath | Out-Null
 
-Invoke-WebRequest https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/install.ps1 -OutFile $getDotNet
+Invoke-WebRequest https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/dotnet-install.ps1 -OutFile $getDotNet
 
 $env:DOTNET_INSTALL_DIR="$solutionPath\.dotnet\win7-x64"
 
 if (!(Test-Path $env:DOTNET_INSTALL_DIR)) {
     New-Item -type directory -path $env:DOTNET_INSTALL_DIR | Out-Null
 }
-    
-& $getDotNet -arch x64
+
+$globalJson = (get-content (join-path $solutionPath "global.json")) | ConvertFrom-Json
+
+& $getDotNet -arch x64 -version $globalJson.sdk.version
 
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 
