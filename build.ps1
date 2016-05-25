@@ -17,7 +17,7 @@ if (!(Test-Path $env:DOTNET_INSTALL_DIR)) {
 
 $globalJson = (get-content (join-path $solutionPath "global.json") -raw) | ConvertFrom-Json
 
-& $getDotNet -version $globalJson.sdk.version
+& $getDotNet -arch x64 -version $globalJson.sdk.version
 
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 
