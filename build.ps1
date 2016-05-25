@@ -15,9 +15,9 @@ if (!(Test-Path $env:DOTNET_INSTALL_DIR)) {
     New-Item -type directory -path $env:DOTNET_INSTALL_DIR | Out-Null
 }
 
-$globalJson = (get-content (join-path $solutionPath "global.json")) | ConvertFrom-Json
+$globalJson = (get-content (join-path $solutionPath "global.json") -raw) | ConvertFrom-Json
 
-& $getDotNet -arch x64 -version $globalJson.sdk.version
+& $getDotNet -version $globalJson.sdk.version
 
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
 
