@@ -34,6 +34,12 @@ namespace Xunit.Runner.DotNet
         ITestExecutionSink _testExecutionSink;
         private Socket _socket;
 
+#if NETCOREAPP1_0
+        private const string _compileTarget = ".NET Core";
+#else
+        private const string _compileTarget = "Desktop .NET";
+#endif
+
         public static int Main(string[] args)
         {
             using (var program = new Program())
@@ -222,7 +228,7 @@ namespace Xunit.Runner.DotNet
         }
 
         void PrintHeader() =>
-            Console.WriteLine($"xUnit.net .NET CLI test runner ({IntPtr.Size * 8}-bit {RuntimeEnvironment.GetRuntimeIdentifier()})");
+            Console.WriteLine($"xUnit.net .NET CLI test runner ({IntPtr.Size * 8}-bit {_compileTarget} {RuntimeEnvironment.GetRuntimeIdentifier()})");
 
         static void PrintUsage(IReadOnlyList<IRunnerReporter> reporters)
         {

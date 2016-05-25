@@ -11,24 +11,24 @@
         "preserveCompilationContext": true
     },
     "packOptions": {
-        "projectUrl": "https://github.com/xunit/coreclr.xunit",
+        "projectUrl": "https://github.com/xunit/dotnet-test-xunit",
         "iconUrl": "https://raw.githubusercontent.com/xunit/media/master/logo-512-transparent.png",
         "licenseUrl": "https://raw.githubusercontent.com/xunit/xunit/master/license.txt",
         "requireLicenseAcceptance": false,
         "repository": {
             "type": "git",
-            "url": "https://github.com/xunit/coreclr.xunit"
+            "url": "https://github.com/xunit/dotnet-test-xunit"
         }
     },
     "configurations": {
         "debug_x86": {
             "buildOptions": {
-                "platform": "anycpu32bitpreferred"
+                "platform": "x86"
             }
         },
         "release_x86": {
             "buildOptions": {
-                "platform": "anycpu32bitpreferred"
+                "platform": "x86"
             }
         }
     },
@@ -49,6 +49,9 @@
         "net451": {
             "frameworkAssemblies": {
                 "System.Threading.Tasks": ""
+            },
+            "dependencies": {
+                "Microsoft.NETCore.Platforms": "1.0.1-rc2-24027"
             }
         }
     },
