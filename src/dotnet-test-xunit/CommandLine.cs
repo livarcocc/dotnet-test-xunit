@@ -7,18 +7,18 @@ namespace Xunit.Runner.DotNet
 {
     public class CommandLine
     {
-        readonly Stack<string> _arguments = new Stack<string>();
-        readonly IReadOnlyList<IRunnerReporter> _reporters;
+        readonly Stack<string> arguments = new Stack<string>();
+        readonly IReadOnlyList<IRunnerReporter> reporters;
 
         protected CommandLine(IReadOnlyList<IRunnerReporter> reporters, string[] args, Predicate<string> fileExists = null)
         {
-            _reporters = reporters;
+            this.reporters = reporters;
 
             if (fileExists == null)
                 fileExists = fileName => File.Exists(fileName);
 
             for (var i = args.Length - 1; i >= 0; i--)
-                _arguments.Push(args[i]);
+                arguments.Push(args[i]);
 
             DesignTimeTestUniqueNames = new List<string>();
             Project = Parse(fileExists);
@@ -77,23 +77,21 @@ namespace Xunit.Runner.DotNet
         }
 
         public static CommandLine Parse(IReadOnlyList<IRunnerReporter> reporters, params string[] args)
-        {
-            return new CommandLine(reporters, args);
-        }
+            => new CommandLine(reporters, args);
 
         protected XunitProject Parse(Predicate<string> fileExists)
         {
-            if (_arguments.Count == 0)
+            if (arguments.Count == 0)
                 throw new ArgumentException("must specify at least one assembly");
 
-            var assemblyFile = _arguments.Pop();
+            var assemblyFile = arguments.Pop();
             string configFile = null;
-            if (_arguments.Count > 0)
+            if (arguments.Count > 0)
             {
-                var value = _arguments.Peek();
+                var value = arguments.Peek();
                 if (!value.StartsWith("-") && value.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
                 {
-                    configFile = _arguments.Pop();
+                    configFile = arguments.Pop();
                     if (!fileExists(configFile))
                         throw new ArgumentException(string.Format("config file not found: {0}", configFile));
                 }
@@ -102,9 +100,9 @@ namespace Xunit.Runner.DotNet
             var assemblies = new List<Tuple<string, string>> { Tuple.Create(assemblyFile, configFile) };
             var project = GetProjectFile(assemblies);
 
-            while (_arguments.Count > 0)
+            while (arguments.Count > 0)
             {
-                var option = PopOption(_arguments);
+                var option = PopOption(arguments);
                 var optionName = option.Key.ToLowerInvariant();
 
                 if (!optionName.StartsWith("-"))
@@ -167,7 +165,7 @@ namespace Xunit.Runner.DotNet
                         throw new ArgumentException("missing argument for -parallel");
 
                     ParallelismOption parallelismOption;
-                    if (!Enum.TryParse<ParallelismOption>(option.Value, ignoreCase: true, result: out parallelismOption))
+                    if (!Enum.TryParse(option.Value, ignoreCase: true, result: out parallelismOption))
                         throw new ArgumentException("incorrect argument value for -parallel");
 
                     switch (parallelismOption)
@@ -283,7 +281,7 @@ namespace Xunit.Runner.DotNet
                 else
                 {
                     // Might be a reporter...
-                    var reporter = _reporters.FirstOrDefault(r => string.Equals(r.RunnerSwitch, optionName, StringComparison.OrdinalIgnoreCase));
+                    var reporter = reporters.FirstOrDefault(r => string.Equals(r.RunnerSwitch, optionName, StringComparison.OrdinalIgnoreCase));
                     if (reporter != null)
                     {
                         GuardNoOptionValue(option);
@@ -307,9 +305,7 @@ namespace Xunit.Runner.DotNet
             }
 
             if (WaitCommand && !Port.HasValue)
-            {
                 throw new ArgumentException("when specifing --wait-command you must also pass a port using --port");
-            }
 
             return project;
         }

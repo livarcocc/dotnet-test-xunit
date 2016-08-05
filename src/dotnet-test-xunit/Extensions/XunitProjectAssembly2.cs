@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace Xunit.Runner.DotNet
 {
     class XunitProjectAssembly2 : XunitProjectAssembly
     {
-        public TestAssemblyConfiguration ConfigurationStream => LoadConfiguration(AssemblyFilename);
+        public TestAssemblyConfiguration ConfigurationStream
+            => LoadConfiguration(AssemblyFilename);
 
         static TestAssemblyConfiguration LoadConfiguration(string assemblyName)
         {
@@ -22,7 +19,7 @@ namespace Xunit.Runner.DotNet
             var directory = Path.GetDirectoryName(assemblyFilename);
             var assemblyName = Path.GetFileNameWithoutExtension(assemblyFilename);
 
-            var pathWithAssemblyName = Path.Combine(directory, assemblyName); 
+            var pathWithAssemblyName = Path.Combine(directory, assemblyName);
 
             // See if there's a directory with the assm name. this might be the case for appx
             if (Directory.Exists(pathWithAssemblyName))
@@ -35,7 +32,7 @@ namespace Xunit.Runner.DotNet
             }
 
             // Fallback to directory with assembly
-            if (File.Exists(Path.Combine(directory,  $"{assemblyName}.xunit.runner.json")))
+            if (File.Exists(Path.Combine(directory, $"{assemblyName}.xunit.runner.json")))
                 return File.OpenRead(Path.Combine(directory, $"{assemblyName}.xunit.runner.json"));
 
             if (File.Exists(Path.Combine(directory, "xunit.runner.json")))
@@ -43,6 +40,5 @@ namespace Xunit.Runner.DotNet
 
             return null;
         }
-
     }
 }

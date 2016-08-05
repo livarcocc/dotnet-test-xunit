@@ -5,25 +5,25 @@ namespace Xunit.Runner.DotNet
 {
     public class SourceInformationProviderAdapater : ISourceInformationProvider
     {
-        private readonly TestHostSourceInformationProvider _provider;
+        readonly TestHostSourceInformationProvider provider;
 
         public SourceInformationProviderAdapater(TestHostSourceInformationProvider provider)
         {
-            _provider = provider;
+            this.provider = provider;
         }
 
         public void Dispose() { }
 
         public ISourceInformation GetSourceInformation(ITestCase testCase)
         {
-            if (_provider == null)
+            if (provider == null)
                 return null;
 
             var reflectionMethodInfo = testCase.TestMethod.Method as IReflectionMethodInfo;
             if (reflectionMethodInfo == null)
                 return null;
 
-            var innerInformation = _provider.GetSourceInformation(reflectionMethodInfo.MethodInfo);
+            var innerInformation = provider.GetSourceInformation(reflectionMethodInfo.MethodInfo);
             if (innerInformation == null)
                 return null;
 
@@ -34,7 +34,7 @@ namespace Xunit.Runner.DotNet
             };
         }
 
-        private class SourceInformation : ISourceInformation
+        class SourceInformation : ISourceInformation
         {
             public string FileName { get; set; }
 

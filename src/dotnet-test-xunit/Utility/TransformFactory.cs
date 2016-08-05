@@ -10,21 +10,21 @@ namespace Xunit.Runner.DotNet
     {
         static readonly TransformFactory Instance = new TransformFactory();
 
-        readonly Dictionary<string, Transform> _availableTransforms = new Dictionary<string, Transform>(StringComparer.OrdinalIgnoreCase);
+        readonly Dictionary<string, Transform> availableTransforms = new Dictionary<string, Transform>(StringComparer.OrdinalIgnoreCase);
 
         protected TransformFactory()
         {
-            _availableTransforms.Add("xml", new Transform { CommandLine = "xml", Description = "output results to xUnit.net v2 style XML file", OutputHandler = Handler_DirectWrite });
+            availableTransforms.Add("xml", new Transform { CommandLine = "xml", Description = "output results to xUnit.net v2 style XML file", OutputHandler = Handler_DirectWrite });
         }
 
         public static List<Transform> AvailableTransforms
         {
-            get { return Instance._availableTransforms.Values.ToList(); }
+            get { return Instance.availableTransforms.Values.ToList(); }
         }
 
         public static List<Action<XElement>> GetXmlTransformers(XunitProject project)
         {
-            return project.Output.Select(output => new Action<XElement>(xml => Instance._availableTransforms[output.Key].OutputHandler(xml, output.Value))).ToList();
+            return project.Output.Select(output => new Action<XElement>(xml => Instance.availableTransforms[output.Key].OutputHandler(xml, output.Value))).ToList();
         }
 
         static void Handler_DirectWrite(XElement xml, string outputFileName)

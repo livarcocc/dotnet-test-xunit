@@ -10,10 +10,10 @@ namespace Xunit.Runner.DotNet
 {
     public static class DesignTimeTestConverter
     {
-        const string Ellipsis = "...";  
-        const int MaximumDisplayNameLength = 447;  
+        const string Ellipsis = "...";
+        const int MaximumDisplayNameLength = 447;
 
-        private readonly static HashAlgorithm Hash = SHA1.Create();
+        readonly static HashAlgorithm Hash = SHA1.Create();
 
         public static IDictionary<ITestCase, VsTestCase> Convert(IEnumerable<ITestCase> testcases)
         {
@@ -62,11 +62,7 @@ namespace Xunit.Runner.DotNet
             return value.Substring(0, MaximumDisplayNameLength - Ellipsis.Length) + Ellipsis;
         }
 
-        private static VsTestCase Convert(
-            ITestCase testcase,
-            string shortName,
-            string fullyQualifiedName,
-            bool uniquifyNames)
+        static VsTestCase Convert(ITestCase testcase, string shortName, string fullyQualifiedName, bool uniquifyNames)
         {
             string uniqueName;
             if (uniquifyNames)
@@ -89,11 +85,11 @@ namespace Xunit.Runner.DotNet
             return result;
         }
 
-        private static Guid GuidFromString(string data)
+        static Guid GuidFromString(string data)
         {
             var hash = Hash.ComputeHash(Encoding.Unicode.GetBytes(data));
             var b = new byte[16];
-            Array.Copy((Array)hash, (Array)b, 16);
+            Array.Copy(hash, b, 16);
             return new Guid(b);
         }
     }

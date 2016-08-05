@@ -1,4 +1,5 @@
-﻿#if !NET451
+﻿#if NETCOREAPP1_0
+
 using System;
 
 namespace Xunit
@@ -9,8 +10,7 @@ namespace Xunit
     /// </summary>
     public class ConsoleRunnerLogger : IRunnerLogger
     {
-        readonly object _lockObject = new object();
-        readonly bool _useColors;
+        readonly bool useColors;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsoleRunnerLogger"/> class.
@@ -19,14 +19,11 @@ namespace Xunit
         /// logging messages.</param>
         public ConsoleRunnerLogger(bool useColors)
         {
-            _useColors = useColors;
+            this.useColors = useColors;
         }
 
         /// <inheritdoc/>
-        public object LockObject
-        {
-            get { return _lockObject; }
-        }
+        public object LockObject { get; } = new object();
 
         /// <inheritdoc/>
         public void LogError(StackFrameInfo stackFrame, string message)
@@ -61,9 +58,7 @@ namespace Xunit
         }
 
         IDisposable SetColor(ConsoleColor color)
-        {
-            return _useColors ? new ColorRestorer(color) : null;
-        }
+            => useColors ? new ColorRestorer(color) : null;
 
         class ColorRestorer : IDisposable
         {
@@ -73,10 +68,9 @@ namespace Xunit
             }
 
             public void Dispose()
-            {
-                Console.ResetColor();
-            }
+                => Console.ResetColor();
         }
     }
 }
+
 #endif

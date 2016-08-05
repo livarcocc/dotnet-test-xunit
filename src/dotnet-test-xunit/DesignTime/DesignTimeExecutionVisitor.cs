@@ -8,15 +8,15 @@ namespace Xunit.Runner.DotNet
 {
     public class DesignTimeExecutionVisitor : TestMessageVisitor<ITestAssemblyFinished>, IExecutionVisitor
     {
-        private readonly ITestExecutionSink _sink;
-        private readonly IDictionary<ITestCase, VsTestCase> _conversions;
-        private readonly IMessageSink _next;
+        private readonly ITestExecutionSink sink;
+        private readonly IDictionary<ITestCase, VsTestCase> conversions;
+        private readonly IMessageSink next;
 
         public DesignTimeExecutionVisitor(ITestExecutionSink sink, IDictionary<ITestCase, VsTestCase> conversions, IMessageSink next)
         {
-            _sink = sink;
-            _conversions = conversions;
-            _next = next;
+            this.sink = sink;
+            this.conversions = conversions;
+            this.next = next;
 
             ExecutionSummary = new ExecutionSummary();
         }
@@ -25,25 +25,25 @@ namespace Xunit.Runner.DotNet
 
         protected override bool Visit(ITestStarting testStarting)
         {
-            var test = _conversions[testStarting.TestCase];
+            var test = conversions[testStarting.TestCase];
 
-            _sink?.SendTestStarted(test);
+            sink?.SendTestStarted(test);
 
             return true;
         }
 
         protected override bool Visit(ITestSkipped testSkipped)
         {
-            var test = _conversions[testSkipped.TestCase];
+            var test = conversions[testSkipped.TestCase];
 
-            _sink?.SendTestResult(new TestResult(test) { Outcome = TestOutcome.Skipped });
+            sink?.SendTestResult(new TestResult(test) { Outcome = TestOutcome.Skipped });
 
             return true;
         }
 
         protected override bool Visit(ITestFailed testFailed)
         {
-            var test = _conversions[testFailed.TestCase];
+            var test = conversions[testFailed.TestCase];
             var result = new TestResult(test)
             {
                 Outcome = TestOutcome.Failed,
@@ -54,16 +54,16 @@ namespace Xunit.Runner.DotNet
 
             result.Messages.Add(testFailed.Output);
 
-            _sink?.SendTestResult(result);
+            sink?.SendTestResult(result);
 
             return true;
         }
 
         protected override bool Visit(ITestPassed testPassed)
         {
-            var test = _conversions[testPassed.TestCase];
+            var test = conversions[testPassed.TestCase];
 
-            _sink?.SendTestResult(new TestResult(test)
+            sink?.SendTestResult(new TestResult(test)
             {
                 Outcome = TestOutcome.Passed,
                 Duration = TimeSpan.FromSeconds((double)testPassed.ExecutionTime),
@@ -91,7 +91,7 @@ namespace Xunit.Runner.DotNet
         {
             return
                 base.OnMessage(message) &&
-                _next.OnMessage(message);
+                next.OnMessage(message);
         }
     }
 }

@@ -9,25 +9,19 @@ namespace Xunit.Runner.DotNet
 {
     public class BinaryWriterTestExecutionSink : BinaryWriterTestSink, ITestExecutionSink
     {
-        private readonly ConcurrentDictionary<string, TestState> _runningTests;
+        readonly ConcurrentDictionary<string, TestState> runningTests;
 
         public BinaryWriterTestExecutionSink(BinaryWriter binaryWriter) : base(binaryWriter)
         {
-            _runningTests = new ConcurrentDictionary<string, TestState>();
+            runningTests = new ConcurrentDictionary<string, TestState>();
         }
 
         public void SendTestStarted(Test test)
         {
-            if (test == null)
-            {
-                throw new ArgumentNullException(nameof(test));
-            }
+            Guard.ArgumentNotNull(nameof(test), test);
 
             if (test.FullyQualifiedName != null)
-            {
-                var state = new TestState() { StartTime = DateTimeOffset.Now, };
-                _runningTests.TryAdd(test.FullyQualifiedName, state);
-            }
+                runningTests.TryAdd(test.FullyQualifiedName, new TestState() { StartTime = DateTimeOffset.Now, });
 
             BinaryWriter.Write(JsonConvert.SerializeObject(new Message
             {
@@ -38,23 +32,18 @@ namespace Xunit.Runner.DotNet
 
         public void SendTestResult(TestResult testResult)
         {
-            if (testResult == null)
-            {
-                throw new ArgumentNullException(nameof(testResult));
-            }
+            Guard.ArgumentNotNull(nameof(testResult), testResult);
 
             if (testResult.StartTime == default(DateTimeOffset) && testResult.Test.FullyQualifiedName != null)
             {
                 TestState state;
-                _runningTests.TryRemove(testResult.Test.FullyQualifiedName, out state);
+                runningTests.TryRemove(testResult.Test.FullyQualifiedName, out state);
 
                 testResult.StartTime = state.StartTime;
             }
 
             if (testResult.EndTime == default(DateTimeOffset))
-            {
                 testResult.EndTime = DateTimeOffset.Now;
-            }
 
             BinaryWriter.Write(JsonConvert.SerializeObject(new Message
             {
@@ -63,7 +52,7 @@ namespace Xunit.Runner.DotNet
             }));
         }
 
-        private class TestState
+        class TestState
         {
             public DateTimeOffset StartTime { get; set; }
         }

@@ -24,20 +24,20 @@ namespace Xunit.Runner.DotNet
     public class Program : IDisposable
     {
 #pragma warning disable 0649
-        volatile bool _cancel;
+        volatile bool cancel;
 #pragma warning restore 0649
-        readonly ConcurrentDictionary<string, ExecutionSummary> _completionMessages = new ConcurrentDictionary<string, ExecutionSummary>();
-        bool _failed;
-        IRunnerLogger _logger;
-        IMessageSink _reporterMessageHandler;
-        ITestDiscoverySink _testDiscoverySink;
-        ITestExecutionSink _testExecutionSink;
-        private Socket _socket;
+        readonly ConcurrentDictionary<string, ExecutionSummary> completionMessages = new ConcurrentDictionary<string, ExecutionSummary>();
+        bool failed;
+        IRunnerLogger logger;
+        IMessageSink reporterMessageHandler;
+        ITestDiscoverySink testDiscoverySink;
+        ITestExecutionSink testExecutionSink;
+        private Socket socket;
 
 #if NETCOREAPP1_0
-        private const string _compileTarget = ".NET Core";
+        private const string compileTarget = ".NET Core";
 #else
-        private const string _compileTarget = "Desktop .NET";
+        private const string compileTarget = "Desktop .NET";
 #endif
 
         public static int Main(string[] args)
@@ -59,13 +59,13 @@ namespace Xunit.Runner.DotNet
                     return 2;
                 }
 
-#if !NETSTANDARDAPP1_5 && !NETCOREAPP1_0
+#if !NETCOREAPP1_0
                 AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 #endif
 
                 var commandLine = CommandLine.Parse(reporters, args);
 
-#if !NETSTANDARDAPP1_5 && !NETCOREAPP1_0
+#if !NETCOREAPP1_0
                 if (commandLine.Debug)
                     Debugger.Launch();
 #else
@@ -76,8 +76,8 @@ namespace Xunit.Runner.DotNet
                 }
 #endif
 
-                _logger = new ConsoleRunnerLogger(!commandLine.NoColor);
-                _reporterMessageHandler = commandLine.Reporter.CreateMessageHandler(_logger);
+                logger = new ConsoleRunnerLogger(!commandLine.NoColor);
+                reporterMessageHandler = commandLine.Reporter.CreateMessageHandler(logger);
 
                 if (!commandLine.NoLogo)
                     PrintHeader();
@@ -85,19 +85,19 @@ namespace Xunit.Runner.DotNet
                 var testsToRun = commandLine.DesignTimeTestUniqueNames;
                 if (commandLine.Port.HasValue)
                 {
-                    _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
                     var ipEndPoint = new IPEndPoint(IPAddress.Loopback, commandLine.Port.Value);
 
-                    _socket.Connect(ipEndPoint);
-                    var networkStream = new NetworkStream(_socket);
+                    socket.Connect(ipEndPoint);
+                    var networkStream = new NetworkStream(socket);
 
                     UseTestSinksWithSockets(networkStream);
 
                     if (commandLine.WaitCommand)
                     {
                         var reader = new BinaryReader(networkStream);
-                        _testExecutionSink.SendWaitingCommand();
+                        testExecutionSink.SendWaitingCommand();
 
                         var rawMessage = reader.ReadString();
                         var message = JsonConvert.DeserializeObject<Message>(rawMessage);
@@ -137,20 +137,20 @@ namespace Xunit.Runner.DotNet
 
         public void Dispose()
         {
-            _socket?.Dispose();
+            socket?.Dispose();
         }
 
         private void UseTestSinksWithStandardOutputStreams()
         {
-            _testDiscoverySink = new StreamingTestDiscoverySink(Console.OpenStandardOutput());
-            _testExecutionSink = new StreamingTestExecutionSink(Console.OpenStandardOutput());
+            testDiscoverySink = new StreamingTestDiscoverySink(Console.OpenStandardOutput());
+            testExecutionSink = new StreamingTestExecutionSink(Console.OpenStandardOutput());
         }
 
         private void UseTestSinksWithSockets(NetworkStream networkStream)
         {
             var binaryWriter = new BinaryWriter(networkStream);
-            _testDiscoverySink = new BinaryWriterTestDiscoverySink(binaryWriter);
-            _testExecutionSink = new BinaryWriterTestExecutionSink(binaryWriter);
+            testDiscoverySink = new BinaryWriterTestDiscoverySink(binaryWriter);
+            testExecutionSink = new BinaryWriterTestExecutionSink(binaryWriter);
         }
 
         private static void WaitForInput()
@@ -177,7 +177,7 @@ namespace Xunit.Runner.DotNet
             return projectFile?.FullName;
         }
 
-#if !NETSTANDARDAPP1_5 && !NETCOREAPP1_0
+#if !NETCOREAPP1_0
         static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             var ex = e.ExceptionObject as Exception;
@@ -228,7 +228,7 @@ namespace Xunit.Runner.DotNet
         }
 
         void PrintHeader() =>
-            Console.WriteLine($"xUnit.net .NET CLI test runner ({IntPtr.Size * 8}-bit {_compileTarget} {RuntimeEnvironment.GetRuntimeIdentifier()})");
+            Console.WriteLine($"xUnit.net .NET CLI test runner ({IntPtr.Size * 8}-bit {compileTarget} {RuntimeEnvironment.GetRuntimeIdentifier()})");
 
         static void PrintUsage(IReadOnlyList<IRunnerReporter> reporters)
         {
@@ -250,7 +250,7 @@ namespace Xunit.Runner.DotNet
             Console.WriteLine("                         :   (number)  - limit task thread pool size to 'count'");
             Console.WriteLine("  -wait                  : wait for input after completion");
             Console.WriteLine("  -diagnostics           : enable diagnostics messages for all test assemblies");
-#if !NETSTANDARDAPP1_5 && !NETCOREAPP1_0
+#if !NETCOREAPP1_0
             Console.WriteLine("  -debug                 : launch the debugger to debug the tests");
 #endif
             Console.WriteLine("  -trait \"name=value\"    : only run tests with matching name/value traits");
@@ -367,8 +367,8 @@ namespace Xunit.Runner.DotNet
 
                 clockTime.Stop();
 
-                if (_completionMessages.Count > 0)
-                    _reporterMessageHandler.OnMessage(new TestExecutionSummary(clockTime.Elapsed, _completionMessages.OrderBy(kvp => kvp.Key).ToList()));
+                if (completionMessages.Count > 0)
+                    reporterMessageHandler.OnMessage(new TestExecutionSummary(clockTime.Elapsed, completionMessages.OrderBy(kvp => kvp.Key).ToList()));
             }
 
             Directory.SetCurrentDirectory(originalWorkingFolder);
@@ -376,7 +376,7 @@ namespace Xunit.Runner.DotNet
             foreach (var transformer in xmlTransformers)
                 transformer(assembliesElement);
 
-            return _failed ? 1 : _completionMessages.Values.Sum(summary => summary.Failed);
+            return failed ? 1 : completionMessages.Values.Sum(summary => summary.Failed);
         }
 
         private void SendTestCompletedIfNecessary(bool designTime, bool list)
@@ -385,9 +385,9 @@ namespace Xunit.Runner.DotNet
                 return;
 
             if (list)
-                _testDiscoverySink.SendTestCompleted();
+                testDiscoverySink.SendTestCompleted();
             else
-                _testExecutionSink.SendTestCompleted();
+                testExecutionSink.SendTestCompleted();
         }
 
         XElement ExecuteAssembly(object consoleLock,
@@ -402,22 +402,22 @@ namespace Xunit.Runner.DotNet
                                  bool listTestCases,
                                  IReadOnlyList<string> designTimeFullyQualifiedNames)
         {
-            if (_cancel)
+            if (cancel)
                 return null;
 
             var assemblyElement = needsXml ? new XElement("assembly") : null;
 
             try
             {
-                 // if we had a config file use it
-                var config = assembly.ConfigFilename != null ? assembly.Configuration : assembly.ConfigurationStream;                
+                // if we had a config file use it
+                var config = assembly.ConfigFilename != null ? assembly.Configuration : assembly.ConfigurationStream;
 
                 // Turn off pre-enumeration of theories when we're not running in Visual Studio
                 if (!designTime)
                     config.PreEnumerateTheories = false;
 
                 if (diagnosticMessages)
-                    config.DiagnosticMessages = true;               
+                    config.DiagnosticMessages = true;
 
                 var discoveryOptions = TestFrameworkOptions.ForDiscovery(config);
                 var executionOptions = TestFrameworkOptions.ForExecution(config);
@@ -438,7 +438,7 @@ namespace Xunit.Runner.DotNet
                     var includeSourceInformation = designTime && listTestCases;
 
                     // Discover & filter the tests
-                    _reporterMessageHandler.OnMessage(new TestAssemblyDiscoveryStarting(assembly, false, false, discoveryOptions));
+                    reporterMessageHandler.OnMessage(new TestAssemblyDiscoveryStarting(assembly, false, false, discoveryOptions));
 
                     controller.Find(includeSourceInformation: includeSourceInformation, messageSink: discoveryVisitor, discoveryOptions: discoveryOptions);
                     discoveryVisitor.Finished.WaitOne();
@@ -455,7 +455,7 @@ namespace Xunit.Runner.DotNet
                             {
                                 foreach (var testcase in vsTestCases.Values)
                                 {
-                                    _testDiscoverySink?.SendTestFound(testcase);
+                                    testDiscoverySink?.SendTestFound(testcase);
 
                                     Console.WriteLine(testcase.FullyQualifiedName);
                                 }
@@ -473,9 +473,9 @@ namespace Xunit.Runner.DotNet
                     IExecutionVisitor resultsVisitor;
 
                     if (designTime)
-                        resultsVisitor = new DesignTimeExecutionVisitor(_testExecutionSink, vsTestCases, _reporterMessageHandler);
+                        resultsVisitor = new DesignTimeExecutionVisitor(testExecutionSink, vsTestCases, reporterMessageHandler);
                     else
-                        resultsVisitor = new XmlAggregateVisitor(_reporterMessageHandler, _completionMessages, assemblyElement, () => _cancel);
+                        resultsVisitor = new XmlAggregateVisitor(reporterMessageHandler, completionMessages, assemblyElement, () => cancel);
 
                     IList<ITestCase> filteredTestCases;
                     var testCasesDiscovered = discoveryVisitor.TestCases.Count;
@@ -485,24 +485,24 @@ namespace Xunit.Runner.DotNet
                         filteredTestCases = vsTestCases.Where(t => designTimeFullyQualifiedNames.Contains(t.Value.FullyQualifiedName)).Select(t => t.Key).ToList();
                     var testCasesToRun = filteredTestCases.Count;
 
-                    _reporterMessageHandler.OnMessage(new TestAssemblyDiscoveryFinished(assembly, discoveryOptions, testCasesDiscovered, testCasesToRun));
+                    reporterMessageHandler.OnMessage(new TestAssemblyDiscoveryFinished(assembly, discoveryOptions, testCasesDiscovered, testCasesToRun));
 
                     if (filteredTestCases.Count == 0)
-                        _completionMessages.TryAdd(Path.GetFileName(assembly.AssemblyFilename), new ExecutionSummary());
+                        completionMessages.TryAdd(Path.GetFileName(assembly.AssemblyFilename), new ExecutionSummary());
                     else
                     {
-                        _reporterMessageHandler.OnMessage(new TestAssemblyExecutionStarting(assembly, executionOptions));
+                        reporterMessageHandler.OnMessage(new TestAssemblyExecutionStarting(assembly, executionOptions));
 
                         controller.RunTests(filteredTestCases, resultsVisitor, executionOptions);
                         resultsVisitor.Finished.WaitOne();
 
-                        _reporterMessageHandler.OnMessage(new TestAssemblyExecutionFinished(assembly, executionOptions, resultsVisitor.ExecutionSummary));
+                        reporterMessageHandler.OnMessage(new TestAssemblyExecutionFinished(assembly, executionOptions, resultsVisitor.ExecutionSummary));
                     }
                 }
             }
             catch (Exception ex)
             {
-                _failed = true;
+                failed = true;
 
                 var e = ex;
                 while (e != null)
