@@ -112,7 +112,8 @@ namespace Xunit.Runner.DotNet
 
                 var failCount = RunProject(commandLine.Project, commandLine.ParallelizeAssemblies, commandLine.ParallelizeTestCollections,
                                            commandLine.MaxParallelThreads, commandLine.DiagnosticMessages, commandLine.NoColor,
-                                           commandLine.AppDomains, commandLine.DesignTime, commandLine.List, testsToRun);
+                                           commandLine.AppDomains, commandLine.FailSkips, commandLine.DesignTime, commandLine.List,
+                                           testsToRun);
 
                 if (commandLine.Wait)
                     WaitForInput();
@@ -246,6 +247,7 @@ namespace Xunit.Runner.DotNet
             Console.WriteLine("                         :   on  - turn on app domains (when available)");
             Console.WriteLine("                         :   off - turn off app domains");
 #endif
+            Console.WriteLine("  -failskips             : convert skipped tests into failures");
             Console.WriteLine("  -parallel option       : set parallelization based on option");
             Console.WriteLine("                         :   none        - turn off all parallelization");
             Console.WriteLine("                         :   collections - only parallelize collections");
@@ -304,6 +306,7 @@ namespace Xunit.Runner.DotNet
                        bool diagnosticMessages,
                        bool noColor,
                        AppDomainSupport? appDomains,
+                       bool failSkips,
                        bool designTime,
                        bool list,
                        IReadOnlyList<string> designTimeFullyQualifiedNames)
@@ -344,6 +347,7 @@ namespace Xunit.Runner.DotNet
                             diagnosticMessages,
                             noColor,
                             appDomains,
+                            failSkips,
                             project.Filters,
                             designTime,
                             list,
@@ -366,6 +370,7 @@ namespace Xunit.Runner.DotNet
                             diagnosticMessages,
                             noColor,
                             appDomains,
+                            failSkips,
                             project.Filters,
                             designTime,
                             list,
@@ -411,6 +416,7 @@ namespace Xunit.Runner.DotNet
                                  bool diagnosticMessages,
                                  bool noColor,
                                  AppDomainSupport? appDomain,
+                                 bool failSkips,
                                  XunitFilters filters,
                                  bool designTime,
                                  bool listTestCases,
@@ -491,6 +497,9 @@ namespace Xunit.Runner.DotNet
                         resultsSink = new DesignTimeExecutionSink(testExecutionSink, vsTestCases, reporterMessageHandler);
                     else
                         resultsSink = new XmlAggregateSink(reporterMessageHandler, completionMessages, assemblyElement, () => cancel);
+
+                    if (failSkips)
+                        resultsSink = new FailSkipSink(resultsSink);
 
                     IList<ITestCase> filteredTestCases;
                     var testCasesDiscovered = discoverySink.TestCases.Count;

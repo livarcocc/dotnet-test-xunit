@@ -36,6 +36,8 @@ namespace Xunit.Runner.DotNet
         // Used with --designtime - to specify specific tests by uniqueId.
         public List<string> DesignTimeTestUniqueNames { get; private set; }
 
+        public bool FailSkips { get; protected set; }
+
         public bool List { get; set; }
 
         public int? MaxParallelThreads { get; set; }
@@ -116,6 +118,11 @@ namespace Xunit.Runner.DotNet
                 {
                     GuardNoOptionValue(option);
                     NoLogo = true;
+                }
+                else if (optionName == "failskips")
+                {
+                    GuardNoOptionValue(option);
+                    FailSkips = true;
                 }
                 else if (optionName == "nocolor")
                 {
