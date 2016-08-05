@@ -72,7 +72,7 @@ namespace Xunit.Runner.DotNet
                 if (commandLine.Debug)
                 {
                     Console.WriteLine("Debug support is not available in .NET Core.");
-                    return -1;
+                    return 2;
                 }
 #endif
 
@@ -112,7 +112,7 @@ namespace Xunit.Runner.DotNet
 
                 var failCount = RunProject(commandLine.Project, commandLine.ParallelizeAssemblies, commandLine.ParallelizeTestCollections,
                                            commandLine.MaxParallelThreads, commandLine.DiagnosticMessages, commandLine.NoColor,
-                                           commandLine.DesignTime, commandLine.List, testsToRun);
+                                           commandLine.AppDomains, commandLine.DesignTime, commandLine.List, testsToRun);
 
                 if (commandLine.Wait)
                     WaitForInput();
@@ -241,6 +241,11 @@ namespace Xunit.Runner.DotNet
             Console.WriteLine("Valid options:");
             Console.WriteLine("  -nologo                : do not show the header message");
             Console.WriteLine("  -nocolor               : do not output results with colors");
+#if !NETCOREAPP1_0
+            Console.WriteLine("  -appdomain option      : override default app domain support");
+            Console.WriteLine("                         :   on  - turn on app domains (when available)");
+            Console.WriteLine("                         :   off - turn off app domains");
+#endif
             Console.WriteLine("  -parallel option       : set parallelization based on option");
             Console.WriteLine("                         :   none        - turn off all parallelization");
             Console.WriteLine("                         :   collections - only parallelize collections");
@@ -250,6 +255,9 @@ namespace Xunit.Runner.DotNet
             Console.WriteLine("                         :   default   - run with default (1 thread per CPU thread)");
             Console.WriteLine("                         :   unlimited - run with unbounded thread count");
             Console.WriteLine("                         :   (number)  - limit task thread pool size to 'count'");
+#if !NETCOREAPP1_0
+            Console.WriteLine("  -noshadow              : do not shadow copy assemblies");
+#endif
             Console.WriteLine("  -wait                  : wait for input after completion");
             Console.WriteLine("  -diagnostics           : enable diagnostics messages for all test assemblies");
 #if !NETCOREAPP1_0
@@ -295,6 +303,7 @@ namespace Xunit.Runner.DotNet
                        int? maxThreadCount,
                        bool diagnosticMessages,
                        bool noColor,
+                       AppDomainSupport? appDomains,
                        bool designTime,
                        bool list,
                        IReadOnlyList<string> designTimeFullyQualifiedNames)
@@ -334,6 +343,7 @@ namespace Xunit.Runner.DotNet
                             maxThreadCount,
                             diagnosticMessages,
                             noColor,
+                            appDomains,
                             project.Filters,
                             designTime,
                             list,
@@ -355,6 +365,7 @@ namespace Xunit.Runner.DotNet
                             maxThreadCount,
                             diagnosticMessages,
                             noColor,
+                            appDomains,
                             project.Filters,
                             designTime,
                             list,
@@ -399,6 +410,7 @@ namespace Xunit.Runner.DotNet
                                  int? maxThreadCount,
                                  bool diagnosticMessages,
                                  bool noColor,
+                                 AppDomainSupport? appDomain,
                                  XunitFilters filters,
                                  bool designTime,
                                  bool listTestCases,
@@ -417,7 +429,8 @@ namespace Xunit.Runner.DotNet
                 // Turn off pre-enumeration of theories when we're not running in Visual Studio
                 if (!designTime)
                     config.PreEnumerateTheories = false;
-
+                if (appDomain.HasValue)
+                    assembly.Configuration.AppDomain = appDomain.GetValueOrDefault();
                 if (diagnosticMessages)
                     config.DiagnosticMessages = true;
 
@@ -430,16 +443,17 @@ namespace Xunit.Runner.DotNet
 
                 var assemblyDisplayName = Path.GetFileNameWithoutExtension(assembly.AssemblyFilename);
                 var diagnosticMessageSink = new DiagnosticMessageSink(consoleLock, assemblyDisplayName, config.DiagnosticMessagesOrDefault, noColor);
+                var appDomainSupport = assembly.Configuration.AppDomainOrDefault;
+                var shadowCopy = assembly.Configuration.ShadowCopyOrDefault;
                 var sourceInformationProvider = GetSourceInformationProviderAdapater(assembly);
 
-
-                using (var controller = new XunitFrontController(AppDomainSupport.Denied, assembly.AssemblyFilename, assembly.ConfigFilename, false, diagnosticMessageSink: diagnosticMessageSink, sourceInformationProvider: sourceInformationProvider))
+                using (var controller = new XunitFrontController(appDomainSupport, assembly.AssemblyFilename, assembly.ConfigFilename, shadowCopy, diagnosticMessageSink: diagnosticMessageSink, sourceInformationProvider: sourceInformationProvider))
                 using (var discoverySink = new TestDiscoverySink())
                 {
                     var includeSourceInformation = designTime && listTestCases;
 
                     // Discover & filter the tests
-                    reporterMessageHandler.OnMessage(new TestAssemblyDiscoveryStarting(assembly, false, false, discoveryOptions));
+                    reporterMessageHandler.OnMessage(new TestAssemblyDiscoveryStarting(assembly, controller.CanUseAppDomains && appDomainSupport != AppDomainSupport.Denied, shadowCopy, discoveryOptions));
 
                     controller.Find(includeSourceInformation: includeSourceInformation, messageSink: discoverySink, discoveryOptions: discoveryOptions);
                     discoverySink.Finished.WaitOne();

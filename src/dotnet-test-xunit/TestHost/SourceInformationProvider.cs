@@ -3,7 +3,7 @@ using TestHostSourceInformationProvider = Microsoft.Extensions.Testing.Abstracti
 
 namespace Xunit.Runner.DotNet
 {
-    public class SourceInformationProviderAdapater : ISourceInformationProvider
+    public class SourceInformationProviderAdapater : LongLivedMarshalByRefObject, ISourceInformationProvider
     {
         readonly TestHostSourceInformationProvider provider;
 

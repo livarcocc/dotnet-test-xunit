@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Xunit.Runner.DotNet
 {
-    public abstract class BinaryWriterTestSink : ITestSink
+    public abstract class BinaryWriterTestSink : LongLivedMarshalByRefObject, ITestSink
     {
         protected BinaryWriter BinaryWriter { get; }
 

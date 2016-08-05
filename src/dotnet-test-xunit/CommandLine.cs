@@ -25,6 +25,8 @@ namespace Xunit.Runner.DotNet
             Reporter = reporters.FirstOrDefault(r => r.IsEnvironmentallyEnabled) ?? Reporter ?? new DefaultRunnerReporterWithTypes();
         }
 
+        public AppDomainSupport? AppDomains { get; set; }
+
         public bool DiagnosticMessages { get; set; }
 
         public bool Debug { get; set; }
@@ -120,6 +122,29 @@ namespace Xunit.Runner.DotNet
                     GuardNoOptionValue(option);
                     NoColor = true;
                 }
+                else if (optionName == "appdomain")
+                {
+                    if (option.Value == null)
+                        throw new ArgumentException("missing argument for -appdomain");
+
+                    switch (option.Value)
+                    {
+                        case "on":
+#if NETCOREAPP1_0
+                            throw new ArgumentException("AppDomain support is not available on .NET Core");
+#else
+                            AppDomains = AppDomainSupport.Required;
+                            break;
+#endif
+
+                        case "off":
+                            AppDomains = AppDomainSupport.Denied;
+                            break;
+
+                        default:
+                            throw new ArgumentException("incorrect argument value for -appdomain (must be 'on' or 'off')");
+                    }
+                }
                 else if (optionName == "debug")
                 {
                     GuardNoOptionValue(option);
@@ -191,6 +216,12 @@ namespace Xunit.Runner.DotNet
                             ParallelizeTestCollections = false;
                             break;
                     }
+                }
+                else if (optionName == "noshadow")
+                {
+                    GuardNoOptionValue(option);
+                    foreach (var assembly in project.Assemblies)
+                        assembly.Configuration.ShadowCopy = false;
                 }
                 else if (optionName == "trait")
                 {
