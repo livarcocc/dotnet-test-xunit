@@ -22,7 +22,7 @@ namespace Xunit.Runner.DotNet
 
             DesignTimeTestUniqueNames = new List<string>();
             Project = Parse(fileExists);
-            Reporter = reporters.FirstOrDefault(r => r.IsEnvironmentallyEnabled) ?? Reporter ?? new DefaultRunnerReporter();
+            Reporter = reporters.FirstOrDefault(r => r.IsEnvironmentallyEnabled) ?? Reporter ?? new DefaultRunnerReporterWithTypes();
         }
 
         public bool DiagnosticMessages { get; set; }

@@ -1,48 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Microsoft.Extensions.Testing.Abstractions;
 using Xunit.Abstractions;
 using VsTestCase = Microsoft.Extensions.Testing.Abstractions.Test;
 
 namespace Xunit.Runner.DotNet
 {
-    public class DesignTimeExecutionVisitor : TestMessageVisitor<ITestAssemblyFinished>, IExecutionVisitor
+    public class DesignTimeExecutionSink : TestMessageSink, IExecutionSink
     {
-        private readonly ITestExecutionSink sink;
-        private readonly IDictionary<ITestCase, VsTestCase> conversions;
-        private readonly IMessageSink next;
+        readonly IDictionary<ITestCase, VsTestCase> conversions;
+        readonly IMessageSinkWithTypes next;
+        readonly ITestExecutionSink sink;
 
-        public DesignTimeExecutionVisitor(ITestExecutionSink sink, IDictionary<ITestCase, VsTestCase> conversions, IMessageSink next)
+        public DesignTimeExecutionSink(ITestExecutionSink sink, IDictionary<ITestCase, VsTestCase> conversions, IMessageSinkWithTypes next)
         {
             this.sink = sink;
             this.conversions = conversions;
             this.next = next;
 
             ExecutionSummary = new ExecutionSummary();
+
+            TestAssemblyFinishedEvent += HandleTestAssemblyFinished;
+            TestFailedEvent += HandleTestFailed;
+            TestPassedEvent += HandleTestPassed;
+            TestStartingEvent += HandleTestStarting;
+            TestSkippedEvent += HandleTestSkipped;
         }
 
         public ExecutionSummary ExecutionSummary { get; private set; }
 
-        protected override bool Visit(ITestStarting testStarting)
+        public ManualResetEvent Finished { get; } = new ManualResetEvent(initialState: false);
+
+        void HandleTestStarting(MessageHandlerArgs<ITestStarting> args)
         {
-            var test = conversions[testStarting.TestCase];
+            var test = conversions[args.Message.TestCase];
 
             sink?.SendTestStarted(test);
-
-            return true;
         }
 
-        protected override bool Visit(ITestSkipped testSkipped)
+        void HandleTestSkipped(MessageHandlerArgs<ITestSkipped> args)
         {
-            var test = conversions[testSkipped.TestCase];
+            var test = conversions[args.Message.TestCase];
 
             sink?.SendTestResult(new TestResult(test) { Outcome = TestOutcome.Skipped });
-
-            return true;
         }
 
-        protected override bool Visit(ITestFailed testFailed)
+        void HandleTestFailed(MessageHandlerArgs<ITestFailed> args)
         {
+            var testFailed = args.Message;
             var test = conversions[testFailed.TestCase];
             var result = new TestResult(test)
             {
@@ -55,12 +61,11 @@ namespace Xunit.Runner.DotNet
             result.Messages.Add(testFailed.Output);
 
             sink?.SendTestResult(result);
-
-            return true;
         }
 
-        protected override bool Visit(ITestPassed testPassed)
+        void HandleTestPassed(MessageHandlerArgs<ITestPassed> args)
         {
+            var testPassed = args.Message;
             var test = conversions[testPassed.TestCase];
 
             sink?.SendTestResult(new TestResult(test)
@@ -68,13 +73,11 @@ namespace Xunit.Runner.DotNet
                 Outcome = TestOutcome.Passed,
                 Duration = TimeSpan.FromSeconds((double)testPassed.ExecutionTime),
             });
-
-            return true;
         }
 
-        protected override bool Visit(ITestAssemblyFinished assemblyFinished)
+        void HandleTestAssemblyFinished(MessageHandlerArgs<ITestAssemblyFinished> args)
         {
-            var result = base.Visit(assemblyFinished);
+            var assemblyFinished = args.Message;
 
             ExecutionSummary = new ExecutionSummary
             {
@@ -84,14 +87,13 @@ namespace Xunit.Runner.DotNet
                 Total = assemblyFinished.TestsRun
             };
 
-            return result;
+            Finished.Set();
         }
 
-        public override bool OnMessage(IMessageSinkMessage message)
+        public override bool OnMessageWithTypes(IMessageSinkMessage message, string[] messageTypes)
         {
-            return
-                base.OnMessage(message) &&
-                next.OnMessage(message);
+            return base.OnMessageWithTypes(message, messageTypes)
+                && next.OnMessageWithTypes(message, messageTypes);
         }
     }
 }

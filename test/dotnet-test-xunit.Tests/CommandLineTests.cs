@@ -545,7 +545,7 @@ public class CommandLineTests
         {
             var commandLine = TestableCommandLine.Parse("assemblyName.dll");
 
-            Assert.IsType<DefaultRunnerReporter>(commandLine.Reporter);
+            Assert.IsType<DefaultRunnerReporterWithTypes>(commandLine.Reporter);
         }
 
         [Fact]
@@ -555,7 +555,7 @@ public class CommandLineTests
 
             var commandLine = TestableCommandLine.Parse(new[] { implicitReporter }, "assemblyName.dll");
 
-            Assert.IsType<DefaultRunnerReporter>(commandLine.Reporter);
+            Assert.IsType<DefaultRunnerReporterWithTypes>(commandLine.Reporter);
         }
 
         [Fact]
