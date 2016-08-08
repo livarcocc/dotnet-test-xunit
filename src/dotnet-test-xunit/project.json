@@ -53,6 +53,8 @@
     },
     "dependencies": {
         "Microsoft.Extensions.Testing.Abstractions": "1.0.0-preview2-003121",
-        "xunit.runner.reporters": "2.2.0-beta3-build3342"
+        "xunit.runner.reporters": "2.2.0-beta3-build3342",
+        "Microsoft.Extensions.DependencyModel": "1.0.1-beta-000914",
+        "Microsoft.DotNet.PlatformAbstractions": "1.0.1-beta-000914"
     }
 }

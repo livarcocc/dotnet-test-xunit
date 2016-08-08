@@ -10,7 +10,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Microsoft.DotNet.InternalAbstractions;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.Testing.Abstractions;
