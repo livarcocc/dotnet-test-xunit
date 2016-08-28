@@ -451,6 +451,7 @@ namespace Xunit.Runner.DotNet
                 var diagnosticMessageSink = new DiagnosticMessageSink(consoleLock, assemblyDisplayName, config.DiagnosticMessagesOrDefault, noColor);
                 var appDomainSupport = assembly.Configuration.AppDomainOrDefault;
                 var shadowCopy = assembly.Configuration.ShadowCopyOrDefault;
+                var longRunningSeconds = assembly.Configuration.LongRunningTestSecondsOrDefault;
                 var sourceInformationProvider = GetSourceInformationProviderAdapater(assembly);
 
                 using (var controller = new XunitFrontController(appDomainSupport, assembly.AssemblyFilename, assembly.ConfigFilename, shadowCopy, diagnosticMessageSink: diagnosticMessageSink, sourceInformationProvider: sourceInformationProvider))
@@ -496,7 +497,7 @@ namespace Xunit.Runner.DotNet
                     if (designTime)
                         resultsSink = new DesignTimeExecutionSink(testExecutionSink, vsTestCases, reporterMessageHandler);
                     else
-                        resultsSink = new XmlAggregateSink(reporterMessageHandler, completionMessages, assemblyElement, () => cancel);
+                        resultsSink = new XmlAggregateSink(reporterMessageHandler, assemblyElement, diagnosticMessageSink, completionMessages, () => cancel, longRunningSeconds);
 
                     if (failSkips)
                         resultsSink = new FailSkipSink(resultsSink);

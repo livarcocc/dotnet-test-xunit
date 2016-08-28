@@ -21,7 +21,7 @@
     },
     "testRunner": "xunit",
     "dependencies": {
-        "xunit": "2.2.0-beta3-build3328",
+        "xunit": "2.2.0-beta3-build3342",
         "dotnet-test-xunit": {
             "version": "99.99.99-dev",
             "target": "package"
