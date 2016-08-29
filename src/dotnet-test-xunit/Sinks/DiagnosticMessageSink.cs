@@ -14,7 +14,7 @@ namespace Xunit.Runner.DotNet
                         if (!noColor)
                             Console.ForegroundColor = ConsoleColor.Yellow;
 
-                        Console.WriteLine("   {0}: {1}", assemblyDisplayName, args.Message.Message);
+                        Console.WriteLine("    {0}: {1}", assemblyDisplayName, args.Message.Message);
 
                         if (!noColor)
                             Console.ForegroundColor = ConsoleColor.Gray;
