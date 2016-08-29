@@ -436,7 +436,7 @@ namespace Xunit.Runner.DotNet
                 if (!designTime)
                     config.PreEnumerateTheories = false;
                 if (appDomain.HasValue)
-                    assembly.Configuration.AppDomain = appDomain.GetValueOrDefault();
+                    config.AppDomain = appDomain.GetValueOrDefault();
                 if (diagnosticMessages)
                     config.DiagnosticMessages = true;
 
@@ -449,9 +449,9 @@ namespace Xunit.Runner.DotNet
 
                 var assemblyDisplayName = Path.GetFileNameWithoutExtension(assembly.AssemblyFilename);
                 var diagnosticMessageSink = new DiagnosticMessageSink(consoleLock, assemblyDisplayName, config.DiagnosticMessagesOrDefault, noColor);
-                var appDomainSupport = assembly.Configuration.AppDomainOrDefault;
-                var shadowCopy = assembly.Configuration.ShadowCopyOrDefault;
-                var longRunningSeconds = assembly.Configuration.LongRunningTestSecondsOrDefault;
+                var appDomainSupport = config.AppDomainOrDefault;
+                var shadowCopy = config.ShadowCopyOrDefault;
+                var longRunningSeconds = config.LongRunningTestSecondsOrDefault;
                 var sourceInformationProvider = GetSourceInformationProviderAdapater(assembly);
 
                 using (var controller = new XunitFrontController(appDomainSupport, assembly.AssemblyFilename, assembly.ConfigFilename, shadowCopy, diagnosticMessageSink: diagnosticMessageSink, sourceInformationProvider: sourceInformationProvider))
