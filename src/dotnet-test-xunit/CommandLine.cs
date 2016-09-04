@@ -8,6 +8,7 @@ namespace Xunit.Runner.DotNet
     public class CommandLine
     {
         readonly Stack<string> arguments = new Stack<string>();
+        IRunnerReporter reporter;
         readonly IReadOnlyList<IRunnerReporter> reporters;
 
         protected CommandLine(IReadOnlyList<IRunnerReporter> reporters, string[] args, Predicate<string> fileExists = null)
@@ -22,7 +23,6 @@ namespace Xunit.Runner.DotNet
 
             DesignTimeTestUniqueNames = new List<string>();
             Project = Parse(fileExists);
-            Reporter = reporters.FirstOrDefault(r => r.IsEnvironmentallyEnabled) ?? Reporter ?? new DefaultRunnerReporterWithTypes();
         }
 
         public AppDomainSupport? AppDomains { get; set; }
@@ -42,6 +42,8 @@ namespace Xunit.Runner.DotNet
 
         public int? MaxParallelThreads { get; set; }
 
+        public bool NoAutoReporters { get; protected set; }
+
         public bool NoColor { get; set; }
 
         public bool NoLogo { get; set; }
@@ -52,7 +54,17 @@ namespace Xunit.Runner.DotNet
 
         public bool? ParallelizeTestCollections { get; set; }
 
-        public IRunnerReporter Reporter { get; protected set; }
+        public IRunnerReporter Reporter
+        {
+            get
+            {
+                var result = reporter;
+                if (!NoAutoReporters)
+                    result = reporters.FirstOrDefault(r => r.IsEnvironmentallyEnabled) ?? result;
+
+                return result ?? new DefaultRunnerReporterWithTypes();
+            }
+        }
 
         public bool Wait { get; protected set; }
 
@@ -151,6 +163,11 @@ namespace Xunit.Runner.DotNet
                         default:
                             throw new ArgumentException("incorrect argument value for -appdomain (must be 'on' or 'off')");
                     }
+                }
+                else if (optionName == "noautoreporters")
+                {
+                    GuardNoOptionValue(option);
+                    NoAutoReporters = true;
                 }
                 else if (optionName == "debug")
                 {
@@ -319,14 +336,14 @@ namespace Xunit.Runner.DotNet
                 else
                 {
                     // Might be a reporter...
-                    var reporter = reporters.FirstOrDefault(r => string.Equals(r.RunnerSwitch, optionName, StringComparison.OrdinalIgnoreCase));
-                    if (reporter != null)
+                    var maybeReporter = reporters.FirstOrDefault(r => string.Equals(r.RunnerSwitch, optionName, StringComparison.OrdinalIgnoreCase));
+                    if (maybeReporter != null)
                     {
                         GuardNoOptionValue(option);
-                        if (Reporter != null)
+                        if (reporter != null)
                             throw new ArgumentException("only one reporter is allowed");
 
-                        Reporter = reporter;
+                        reporter = maybeReporter;
                     }
                     // ...or an result output file
                     else
