@@ -2,7 +2,7 @@
 
 namespace Xunit.Runner.DotNet
 {
-    public class DiagnosticMessageSink : TestMessageSink
+    public class DiagnosticMessageSink : DiagnosticEventSink
     {
         public DiagnosticMessageSink(object consoleLock, string assemblyDisplayName, bool showDiagnostics, bool noColor)
         {

@@ -456,7 +456,7 @@ namespace Xunit.Runner.DotNet
                 var longRunningSeconds = config.LongRunningTestSecondsOrDefault;
                 var sourceInformationProvider = GetSourceInformationProviderAdapater(assembly);
 
-                using (var controller = new XunitFrontController(appDomainSupport, assembly.AssemblyFilename, assembly.ConfigFilename, shadowCopy, diagnosticMessageSink: diagnosticMessageSink, sourceInformationProvider: sourceInformationProvider))
+                using (var controller = new XunitFrontController(appDomainSupport, assembly.AssemblyFilename, assembly.ConfigFilename, shadowCopy, diagnosticMessageSink: MessageSinkAdapter.Wrap(diagnosticMessageSink), sourceInformationProvider: sourceInformationProvider))
                 using (var discoverySink = new TestDiscoverySink())
                 {
                     var includeSourceInformation = designTime && listTestCases;
@@ -499,10 +499,14 @@ namespace Xunit.Runner.DotNet
                     if (designTime)
                         resultsSink = new DesignTimeExecutionSink(testExecutionSink, vsTestCases, reporterMessageHandler);
                     else
-                        resultsSink = new XmlAggregateSink(reporterMessageHandler, assemblyElement, diagnosticMessageSink, completionMessages, () => cancel, longRunningSeconds);
+                        resultsSink = new DelegatingExecutionSummarySink(reporterMessageHandler, () => cancel, (path, summary) => completionMessages.TryAdd(path, summary));
 
+                    if (assemblyElement != null)
+                        resultsSink = new DelegatingXmlCreationSink(resultsSink, assemblyElement);
+                    if (longRunningSeconds > 0)
+                        resultsSink = new DelegatingLongRunningTestDetectionSink(resultsSink, TimeSpan.FromSeconds(longRunningSeconds), diagnosticMessageSink);
                     if (failSkips)
-                        resultsSink = new FailSkipSink(resultsSink);
+                        resultsSink = new DelegatingFailSkipSink(resultsSink);
 
                     IList<ITestCase> filteredTestCases;
                     var testCasesDiscovered = discoverySink.TestCases.Count;

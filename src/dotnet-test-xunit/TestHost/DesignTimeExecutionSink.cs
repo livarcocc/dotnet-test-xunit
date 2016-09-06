@@ -21,11 +21,11 @@ namespace Xunit.Runner.DotNet
 
             ExecutionSummary = new ExecutionSummary();
 
-            TestAssemblyFinishedEvent += HandleTestAssemblyFinished;
-            TestFailedEvent += HandleTestFailed;
-            TestPassedEvent += HandleTestPassed;
-            TestStartingEvent += HandleTestStarting;
-            TestSkippedEvent += HandleTestSkipped;
+            Execution.TestAssemblyFinishedEvent += HandleTestAssemblyFinished;
+            Execution.TestFailedEvent += HandleTestFailed;
+            Execution.TestPassedEvent += HandleTestPassed;
+            Execution.TestStartingEvent += HandleTestStarting;
+            Execution.TestSkippedEvent += HandleTestSkipped;
         }
 
         public ExecutionSummary ExecutionSummary { get; private set; }
@@ -90,7 +90,7 @@ namespace Xunit.Runner.DotNet
             Finished.Set();
         }
 
-        public override bool OnMessageWithTypes(IMessageSinkMessage message, string[] messageTypes)
+        public override bool OnMessageWithTypes(IMessageSinkMessage message, HashSet<string> messageTypes)
         {
             return base.OnMessageWithTypes(message, messageTypes)
                 && next.OnMessageWithTypes(message, messageTypes);
