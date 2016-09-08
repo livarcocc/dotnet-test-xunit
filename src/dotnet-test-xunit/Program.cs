@@ -542,13 +542,7 @@ namespace Xunit.Runner.DotNet
 
         private static ISourceInformationProvider GetSourceInformationProviderAdapater(XunitProjectAssembly assembly)
         {
-            var directoryPath = Path.GetDirectoryName(assembly.AssemblyFilename);
-            var assemblyName = Path.GetFileNameWithoutExtension(assembly.AssemblyFilename);
-            var pdbPath = Path.Combine(directoryPath, assemblyName + FileNameSuffixes.DotNet.ProgramDatabase);
-
-            return File.Exists(pdbPath)
-                ? new SourceInformationProviderAdapater(new SourceInformationProvider(pdbPath))
-                : null;
+            return new SourceInformationProviderAdapater(new SourceInformationProvider(assembly.AssemblyFilename));
         }
 
         static Task<T> TaskRun<T>(Func<T> function)
