@@ -235,7 +235,7 @@ namespace Xunit.Runner.DotNet
 
         static void PrintUsage(IReadOnlyList<IRunnerReporter> reporters)
         {
-            Console.WriteLine("Copyright (C) 2016 Outercurve Foundation.");
+            Console.WriteLine("Copyright (C) 2016 .NET Foundation.");
             Console.WriteLine();
             Console.WriteLine("usage: dotnet-test-xunit [configFile.json] [options] [reporter] [resultFormat filename [...]]");
             Console.WriteLine();
