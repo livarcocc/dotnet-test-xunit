@@ -41,9 +41,16 @@ namespace Xunit.Runner.DotNet
 
         void HandleTestSkipped(MessageHandlerArgs<ITestSkipped> args)
         {
-            var test = conversions[args.Message.TestCase];
+            var testSkipped = args.Message;
+            var test = conversions[testSkipped.TestCase];
+            var result = new TestResult(test) { Outcome = TestOutcome.Skipped };
 
-            sink?.SendTestResult(new TestResult(test) { Outcome = TestOutcome.Skipped });
+            result.Messages.Add($"Reason: {testSkipped.Reason}");
+
+            if (!string.IsNullOrWhiteSpace(testSkipped.Output))
+                result.Messages.Add(testSkipped.Output);
+
+            sink?.SendTestResult(result);
         }
 
         void HandleTestFailed(MessageHandlerArgs<ITestFailed> args)
@@ -58,7 +65,8 @@ namespace Xunit.Runner.DotNet
                 ErrorStackTrace = string.Join(Environment.NewLine, testFailed.StackTraces),
             };
 
-            result.Messages.Add(testFailed.Output);
+            if (!string.IsNullOrWhiteSpace(testFailed.Output))
+                result.Messages.Add(testFailed.Output);
 
             sink?.SendTestResult(result);
         }
@@ -67,12 +75,16 @@ namespace Xunit.Runner.DotNet
         {
             var testPassed = args.Message;
             var test = conversions[testPassed.TestCase];
-
-            sink?.SendTestResult(new TestResult(test)
+            var result = new TestResult(test)
             {
                 Outcome = TestOutcome.Passed,
                 Duration = TimeSpan.FromSeconds((double)testPassed.ExecutionTime),
-            });
+            };
+
+            if (!string.IsNullOrWhiteSpace(testPassed.Output))
+                result.Messages.Add(testPassed.Output);
+
+            sink?.SendTestResult(result);
         }
 
         void HandleTestAssemblyFinished(MessageHandlerArgs<ITestAssemblyFinished> args)
